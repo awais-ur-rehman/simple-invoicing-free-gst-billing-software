@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import formatCurrency, { formatDate, formatDateTime, plural } from './formatting.ts';
+import formatCurrency, { formatCompactCurrency, formatDate, formatDateTime, plural } from './formatting.ts';
 import { formatInvoiceDateLabel } from './invoiceDueDate.ts';
 
 test('formatCurrency(1000, USD) → $1,000.00', () => {
@@ -16,6 +16,21 @@ test('formatCurrency(1000) → ₹1,000.00', () => {
 
 test('zero value', () => {
   expect(formatCurrency(0, 'USD')).toBe('$0.00');
+});
+
+test.each([-0, -1e-14, -0.004, 0, 0.004])('formats a rounded zero without a minus sign: %s', (value) => {
+  expect(formatCurrency(value)).toBe('₹0.00');
+  expect(formatCompactCurrency(value)).toBe('₹0.00');
+});
+
+test('normalizes rounded zero for other and invalid currencies', () => {
+  expect(formatCurrency(-0.004, 'USD')).toBe('$0.00');
+  expect(formatCurrency(-0.004, 'INVALID')).toBe('₹0.00');
+});
+
+test('keeps the sign at the rounding boundary', () => {
+  expect(formatCurrency(-0.005)).toBe('-₹0.01');
+  expect(formatCurrency(0.005)).toBe('₹0.01');
 });
 
 test('negative value', () => {

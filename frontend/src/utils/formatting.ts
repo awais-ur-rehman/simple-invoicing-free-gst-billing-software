@@ -3,6 +3,7 @@ function localeFor(currencyCode: string) {
 }
 
 export default function formatCurrency(value: number, currencyCode = 'INR') {
+    if (Math.abs(value) < 0.005) value = 0;
     try {
         return new Intl.NumberFormat(localeFor(currencyCode), {
             style: 'currency',
